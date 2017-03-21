@@ -8,9 +8,10 @@ const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
   filename: 'index.html',
   inject: 'body',
 });
-const ExtractTextPluginConfig = new ExtractTextPlugin({
+const ExtractSass = new ExtractTextPlugin({
   filename: 'style.css',
 });
+const ExtractFlags = new ExtractTextPlugin('flags.css');
 
 const config = {
   entry: './src/index.js',
@@ -24,20 +25,47 @@ const config = {
       'node_modules',
     ],
     alias: {
+      flags: 'node_modules/flag-icon-css/sass/_flag-icon.scss',
       styles: 'src/sass/style.sass',
     },
   },
   module: {
     rules: [{
-      test: /\.js?/,
+      test: /\.svg$/,
+      use: [{
+        loader: 'svg-url-loader',
+      }],
+    }, {
+      test: /\.js?$/,
       loaders: [
         'babel-loader',
         'eslint-loader',
       ],
       exclude: /node_modules/,
     }, {
+      test: /\.scss$/,
+      use: ExtractFlags.extract({
+        fallback: 'style-loader',
+        use: [{
+          loader: 'css-loader',
+          options: { sourceMap: true },
+        }, {
+          loader: 'postcss-loader',
+          options: {
+            plugins: () => [autoprefixer],
+            sourceMap: true,
+          },
+        }, {
+          loader: 'sass-loader',
+          options: {
+            outputStyle: 'expanded',
+            sourceMap: true,
+          },
+        }],
+      }),
+    }, {
       test: /\.sass$/,
-      use: ExtractTextPlugin.extract({
+      use: ExtractSass.extract({
         fallback: 'style-loader',
         use: [{
           loader: 'css-loader',
@@ -60,7 +88,8 @@ const config = {
   },
   plugins: [
     HtmlWebpackPluginConfig,
-    ExtractTextPluginConfig,
+    ExtractFlags,
+    ExtractSass,
   ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
