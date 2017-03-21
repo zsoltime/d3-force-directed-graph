@@ -58,6 +58,14 @@ function visualize(data) {
   const relativeTop = y => Math.max(0, Math.min(height, y));
   const relativeLeft = x => Math.max(0, Math.min(width, x));
 
+  const tooltip = d3.select('body')
+    .append('div')
+      .attr('class', 'tooltip');
+
+  const translateTooltip = e => (
+    `translate(calc(${e.pageX}px - 50%), calc(${e.pageY}px - 150%))`
+  );
+
   const node = flags.selectAll('.node')
     .data(simulation.nodes(), d => d.code)
     .enter()
@@ -65,6 +73,14 @@ function visualize(data) {
       .attr('width', flagWidth)
       .attr('height', flagHeight)
       .attr('class', d => `flag-icon flag-icon-${d.code}`)
+      .on('mouseover', (d) => {
+        tooltip.text(d.country)
+          .attr('class', 'tooltip tooltip--is-visible')
+          .style('transform', translateTooltip(d3.event));
+      })
+      .on('mouseout', () => {
+        tooltip.attr('class', 'tooltip');
+      })
       .call(d3.drag()
         .on('start', dragStarted)
         .on('drag', dragged)
