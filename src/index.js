@@ -1,4 +1,15 @@
-import * as d3 from 'd3';
+import {
+  drag,
+  forceCenter,
+  forceCollide,
+  forceLink,
+  forceManyBody,
+  forceSimulation,
+  event,
+  json,
+  mouse,
+  select
+} from 'd3';
 import 'styles';
 import 'flags';
 
@@ -19,33 +30,33 @@ function visualize(data) {
   const flagHeight = 16;
   const flagWidth = 12;
 
-  const graph = d3.select('#graph');
+  const graph = select('#graph');
   const svg = graph.append('svg')
     .attr('class', 'graph')
     .attr('width', canvasWidth)
     .attr('height', canvasHeight);
 
-  const simulation = d3.forceSimulation()
+  const simulation = forceSimulation()
     .nodes(data.nodes);
-  const links = d3.forceLink(data.links)
+  const links = forceLink(data.links)
     .distance(linkDistance);
 
   simulation.force('link', links)
-    .force('charge', d3.forceManyBody().distanceMax(100).distanceMin(5))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collide', d3.forceCollide().radius(20));
+    .force('charge', forceManyBody().distanceMax(100).distanceMin(5))
+    .force('center', forceCenter(width / 2, height / 2))
+    .force('collide', forceCollide().radius(20));
 
   const dragStarted = () => {
-    if (!d3.event.active) {
+    if (!event.active) {
       simulation.alphaTarget(0.3).restart();
     }
   };
   const dragged = (d) => {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
+    d.fx = event.x;
+    d.fy = event.y;
   };
   const dragEnded = (d) => {
-    if (!d3.event.active) {
+    if (!event.active) {
       simulation.alphaTarget(0);
     }
     d.fx = undefined;
@@ -58,13 +69,9 @@ function visualize(data) {
   const relativeTop = y => Math.max(0, Math.min(height, y));
   const relativeLeft = x => Math.max(0, Math.min(width, x));
 
-  const tooltip = d3.select('body')
+  const tooltip = select('body')
     .append('div')
       .attr('class', 'tooltip');
-
-  const translateTooltip = e => (
-    `translate(calc(${e.pageX}px - 50%), calc(${e.pageY}px - 150%))`
-  );
 
   const node = flags.selectAll('.node')
     .data(simulation.nodes(), d => d.code)
@@ -74,14 +81,21 @@ function visualize(data) {
       .attr('height', flagHeight)
       .attr('class', d => `flag-icon flag-icon-${d.code}`)
       .on('mouseover', (d) => {
+        const tooltipX = `calc(${mouse(document.body)[0]}px - 50%)`;
+        const tooltipY = `calc(${mouse(document.body)[1]}px - 100%)`;
+
         tooltip.text(d.country)
-          .attr('class', 'tooltip tooltip--is-visible')
-          .style('transform', translateTooltip(d3.event));
+          .style('transform', `translate(${tooltipX}, ${tooltipY})`)
+          .transition()
+            .duration(200)
+            .style('opacity', 1);
       })
       .on('mouseout', () => {
-        tooltip.attr('class', 'tooltip');
+        tooltip.transition()
+          .duration(100)
+          .style('opacity', 0);
       })
-      .call(d3.drag()
+      .call(drag()
         .on('start', dragStarted)
         .on('drag', dragged)
         .on('end', dragEnded));
@@ -105,7 +119,7 @@ function visualize(data) {
   });
 }
 
-d3.json(url, (err, data) => {
+json(url, (err, data) => {
   if (err) throw err;
   visualize(data);
 });
