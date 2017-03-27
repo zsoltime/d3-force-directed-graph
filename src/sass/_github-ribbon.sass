@@ -1,0 +1,23 @@
+.github-ribbon
+  align-items: flex-end
+  background-color: rgba(black, .8)
+  box-shadow: 0 0 1.25rem rgba(black, .5)
+  display: flex
+  height: 4rem
+  justify-content: center
+  position: fixed
+  transform-origin: center
+  transition: all .3s ease-in-out
+  width: 8rem
+
+  &:hover
+    box-shadow: 0 0 2rem rgba(black, .3)
+    transform: rotate(45deg) translate(1.375rem, -3rem) scale(1.25)
+
+  path
+    fill: darken($color-background, 5%)
+
+.top-right
+  right: 0
+  top: 0
+  transform: rotate(45deg) translate(1.375rem, -3rem)
