@@ -42,59 +42,69 @@ const config = {
     filename: 'bundle.js',
   },
   resolve: {
-    modules: [
-      path.resolve(__dirname),
-      'node_modules',
-    ],
+    modules: [path.resolve(__dirname), 'node_modules'],
     alias: {
-      flags: 'node_modules/flag-icon-css/sass/_flag-icon.scss',
+      flags: 'node_modules/flag-icon-css/sass/flag-icon.scss',
       styles: 'src/sass/style.sass',
     },
   },
   module: {
-    rules: [{
-      test: /\.svg$/,
-      use: [{
-        loader: 'svg-url-loader',
-      }],
-    }, {
-      test: /\.js?$/,
-      loaders: [
-        'babel-loader',
-      ],
-      exclude: /node_modules/,
-    }, {
-      test: /\.scss$/,
-      use: ExtractFlags.extract({
-        fallback: 'style-loader',
-        use: [{
-          loader: 'css-loader',
-        }, {
-          loader: 'postcss-loader',
-          options: {
-            plugins: () => [autoprefixer],
+    rules: [
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: 'svg-url-loader',
           },
-        }, {
-          loader: 'sass-loader',
-          options: {
-            outputStyle: 'expanded',
-          },
-        }],
-      }),
-    }, {
-      test: /\.sass$/,
-      use: ExtractSass.extract({
-        fallback: 'style-loader',
-        use: [{
-          loader: 'css-loader',
-        }, {
-          loader: 'postcss-loader',
-          options: { plugins: () => [autoprefixer] },
-        }, {
-          loader: 'sass-loader',
-        }],
-      }),
-    }],
+        ],
+      },
+      {
+        test: /\.js?$/,
+        loaders: ['babel-loader'],
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.scss$/,
+        use: ExtractFlags.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                plugins: () => [autoprefixer],
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                outputStyle: 'expanded',
+              },
+            },
+          ],
+        }),
+      },
+      {
+        test: /\.sass$/,
+        use: ExtractSass.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'postcss-loader',
+              options: { plugins: () => [autoprefixer] },
+            },
+            {
+              loader: 'sass-loader',
+            },
+          ],
+        }),
+      },
+    ],
   },
   plugins: [
     EnvironmentConfig,

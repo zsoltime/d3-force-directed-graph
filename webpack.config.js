@@ -25,7 +25,7 @@ const config = {
       'node_modules',
     ],
     alias: {
-      flags: 'node_modules/flag-icon-css/sass/_flag-icon.scss',
+      flags: 'node_modules/flag-icon-css/sass/flag-icon.scss',
       styles: 'src/sass/style.sass',
     },
   },

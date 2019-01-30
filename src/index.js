@@ -26,25 +26,30 @@ function visualize(data) {
   const canvasHeight = window.innerHeight * 0.8;
   const width = canvasWidth - margins.right - margins.left;
   const height = canvasHeight - margins.top - margins.bottom;
-  const linkDistance = 10;
+  const linkDistance = 1;
   const flagHeight = 16;
   const flagWidth = 12;
 
   const graph = select('#graph');
-  const svg = graph.append('svg')
+  const svg = graph
+    .append('svg')
     .attr('class', 'graph')
     .attr('width', canvasWidth)
     .attr('height', canvasHeight);
 
-  const simulation = forceSimulation()
-    .nodes(data.nodes);
-  const links = forceLink(data.links)
-    .distance(linkDistance);
+  const simulation = forceSimulation().nodes(data.nodes);
+  const links = forceLink(data.links).distance(linkDistance);
 
-  simulation.force('link', links)
-    .force('charge', forceManyBody().distanceMax(100).distanceMin(5))
+  simulation
+    .force('link', links)
+    .force(
+      'charge',
+      forceManyBody()
+        .distanceMax(128)
+        .distanceMin(32)
+    )
     .force('center', forceCenter(width / 2, height / 2))
-    .force('collide', forceCollide().radius(20));
+    .force('collide', forceCollide().radius(1));
 
   const dragStarted = () => {
     if (!event.active) {
@@ -63,53 +68,60 @@ function visualize(data) {
     d.fy = undefined;
   };
 
-  const flags = graph.append('div')
-    .attr('class', 'flags');
+  const flags = graph.append('div').attr('class', 'flags');
 
   const relativeTop = y => Math.max(0, Math.min(height, y));
   const relativeLeft = x => Math.max(0, Math.min(width, x));
 
   const tooltip = select('body')
     .append('div')
-      .attr('class', 'tooltip');
+    .attr('class', 'tooltip');
 
-  const node = flags.selectAll('.node')
+  const node = flags
+    .selectAll('.node')
     .data(simulation.nodes(), d => d.code)
     .enter()
     .append('img')
-      .attr('width', flagWidth)
-      .attr('height', flagHeight)
-      .attr('class', d => `flag-icon flag-icon-${d.code}`)
-      .on('mouseover', (d) => {
-        const tooltipX = `calc(${mouse(document.body)[0]}px - 50%)`;
-        const tooltipY = `calc(${mouse(document.body)[1]}px - 100%)`;
+    .attr('width', flagWidth)
+    .attr('height', flagHeight)
+    .attr('class', d => `flag-icon flag-icon-${d.code}`)
+    .on('mouseover', (d) => {
+      const tooltipX = `calc(${mouse(document.body)[0]}px - 50%)`;
+      const tooltipY = `calc(${mouse(document.body)[1]}px - 100%)`;
 
-        tooltip.text(d.country)
-          .style('transform', `translate(${tooltipX}, ${tooltipY})`)
-          .transition()
-            .duration(200)
-            .style('opacity', 1);
-      })
-      .on('mouseout', () => {
-        tooltip.transition()
-          .duration(100)
-          .style('opacity', 0);
-      })
-      .call(drag()
+      tooltip
+        .text(d.country)
+        .style('transform', `translate(${tooltipX}, ${tooltipY})`)
+        .transition()
+        .duration(200)
+        .style('opacity', 1);
+    })
+    .on('mouseout', () => {
+      tooltip
+        .transition()
+        .duration(100)
+        .style('opacity', 0);
+    })
+    .call(
+      drag()
         .on('start', dragStarted)
         .on('drag', dragged)
-        .on('end', dragEnded));
+        .on('end', dragEnded)
+    );
 
-  const link = svg.selectAll('.link')
+  const link = svg
+    .selectAll('.link')
     .data(links.links())
     .enter()
     .append('line')
-      .attr('class', 'link');
+    .attr('class', 'link');
 
   simulation.on('tick', () => {
-    node.style('transform', d => (
-      `translate(${relativeLeft(d.x - (flagWidth / 2))}px,
-        ${relativeTop(d.y - (flagHeight / 2))}px)`)
+    node.style(
+      'transform',
+      d =>
+        `translate(${relativeLeft(d.x - flagWidth / 2)}px,
+        ${relativeTop(d.y - flagHeight / 2)}px)`
     );
     link
       .attr('x1', d => `${relativeLeft(d.source.x)}px`)
